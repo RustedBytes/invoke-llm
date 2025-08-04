@@ -24,7 +24,7 @@ input file, and writing the response to an output file.
 To install `invoke-llm`, run the following command:
 
 ```bash
-cargo install --path .
+cargo install --git https://github.com/RustedBytes/invoke-llm
 ```
 
 ### Usage
