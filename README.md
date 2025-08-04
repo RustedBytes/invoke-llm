@@ -1,9 +1,12 @@
 # Invoke LLM
 
+[![unit tests](https://github.com/RustedBytes/invoke-llm/actions/workflows/test.yaml/badge.svg)](https://github.com/RustedBytes/invoke-llm/actions/workflows/test.yaml)
+[![security audit](https://github.com/RustedBytes/invoke-llm/actions/workflows/audit.yaml/badge.svg)](https://github.com/RustedBytes/invoke-llm/actions/workflows/audit.yaml)
+
 A command-line tool for querying OpenAI-compatible endpoints with a prompt and
 input file, and writing the response to an output file.
 
-### Table of Contents
+## Table of Contents
 
 * [Installation](#installation)
 * [Usage](#usage)
@@ -75,7 +78,6 @@ To run `invoke-llm` with some pre-defined prompts, use the following commands:
 just -f llmfile code_review
 just -f llmfile gemma_grammar_check
 ```
-
 
 ## Development
 
