@@ -1,0 +1,29 @@
+name: unit tests
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '**/*.rs'
+  pull_request:
+    paths:
+      - '**/*.rs'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@nightly
+      - name: Install libav/libsw
+        run: sudo apt install -y libavcodec-dev libavformat-dev libswscale-dev libavfilter-dev libavdevice-dev libavutil-dev
+      - name: Setup FFmpeg
+        uses: AnimMouse/setup-ffmpeg@v1
+        with:
+          version: master
+      - name: Test
+        run: cargo test --target x86_64-unknown-linux-gnu
+      - name: Install cargo-careful
+        run: cargo install cargo-careful
+      - name: Run cargo-careful
+        run: cargo +nightly careful test --target x86_64-unknown-linux-gnu

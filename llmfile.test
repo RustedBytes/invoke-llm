@@ -1,0 +1,16 @@
+set dotenv-load := true
+
+llm_call_gemini:
+    cargo run -- -e google -m "gemini-2.5-flash" -t 1000 -p examples/prompt.txt -i examples/input.txt -o result_gemini.txt
+
+llm_call_gemma:
+    cargo run -- -e google -m "gemma-3n-e2b-it" -t 100 -p examples/prompt.txt -i examples/input.txt -o result_gemma.txt
+
+llm_call_hf:
+    cargo run -- -e hf -m "meta-llama/Llama-3.1-8B-Instruct:cerebras" -t 200 -p examples/prompt.txt -i examples/input.txt -o result_llama.txt
+
+llm_call_oai:
+    cargo run -- -e openai -m "gpt-4.1-mini" -t 200 -p examples/prompt.txt -i examples/input.txt -o result_gpt4mini.txt
+
+llm_call_oai_reasoning:
+    cargo run -- -e openai -r -m "o4-mini" -t 1000 -p examples/prompt.txt -i examples/input.txt -o result_o4mini.txt

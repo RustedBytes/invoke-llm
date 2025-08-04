@@ -1,0 +1,34 @@
+set dotenv-load := true
+
+init:
+    cargo install action-validator dircat just
+    brew install lefthook
+
+check: fmt
+    cargo +nightly clippy -- -W clippy::pedantic
+
+check_fmt:
+    cargo +nightly fmt -- --check
+
+fmt_yaml:
+    yamlfmt lefthook.yml
+    yamlfmt -dstar .github/**/*.{yaml,yml}
+
+md_fmt:
+    markdown-fmt -m 80 CONTRIBUTING.md
+    markdown-fmt -m 80 README.md
+
+fmt: fmt_yaml
+    cargo +nightly fmt
+
+test:
+    cargo test
+
+audit:
+    cargo audit -D warnings
+
+doc:
+    cargo doc --open
+
+release: check
+    cargo build --release

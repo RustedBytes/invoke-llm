@@ -1,0 +1,17 @@
+target/
+frames/
+segments/
+
+.llms/*.md
+
+.ruff_cache
+
+.env
+.DS_Store
+
+testlog
+tarpaulin-report.html
+
+ctx.md
+
+result_*.txt

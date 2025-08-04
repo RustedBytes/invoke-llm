@@ -1,0 +1,25 @@
+name: update-deps
+on:
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Setup cargo and update dependencies
+        run: |
+          cargo install cargo-edit
+          cargo update
+          cargo upgrade --incompatible
+        shell: bash
+      - name: Create PR
+        id: create-pr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update dependencies'
+          title: 'chore: update dependencies'
+          body: |
+            chore: update dependencies
+          branch: update-dependencies

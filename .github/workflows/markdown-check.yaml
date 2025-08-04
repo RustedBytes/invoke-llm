@@ -1,0 +1,22 @@
+name: markdown check
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '*.md'
+  pull_request:
+    paths:
+      - '*.md'
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Check links
+        uses: eugenescodes/md-check@main
+      - name: Check markdown
+        uses: DavidAnson/markdownlint-cli2-action@v20
+        with:
+          config: .github/.markdownlint.yaml
+          globs: '**/*.md'

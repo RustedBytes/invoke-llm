@@ -1,0 +1,14 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: check-justfile
+      run: just --check --fmt --unstable
+    - name: cargo-fmt-check
+      run: cargo +nightly fmt --all -- --check
+    - name: cargo-test
+      run: cargo test --all
+    - name: validate-workflows
+      run: action-validator .github/workflows/*.yaml
+
+# - name: cargo-doc
+#   run: cargo doc --no-deps
