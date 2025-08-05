@@ -86,7 +86,7 @@ To contribute to this project, you'll need:
 2. `cargo install action-validator dircat just`
 3. `cargo install --git https://github.com/ytmimi/markdown-fmt markdown-fmt
    --features="build-binary"`
-4. `brew install lefthook` (for pre-commit hooks)
+4. [lefthook](https://github.com/evilmartians/lefthook) (for pre-commit hooks)
 5. [yamlfmt](https://github.com/google/yamlfmt) (for YAML formatting)
 
 ## Building and Testing
