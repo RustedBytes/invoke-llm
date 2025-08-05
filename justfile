@@ -18,7 +18,7 @@ md_fmt:
     markdown-fmt -m 80 CONTRIBUTING.md
     markdown-fmt -m 80 README.md
 
-fmt: yaml_fmt
+fmt: yaml_fmt md_fmt
     cargo +nightly fmt
 
 test:

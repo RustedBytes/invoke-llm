@@ -1,7 +1,6 @@
 # Invoke LLM
 
-[![unit tests](https://github.com/RustedBytes/invoke-llm/actions/workflows/test.yaml/badge.svg)](https://github.com/RustedBytes/invoke-llm/actions/workflows/test.yaml)
-[![security audit](https://github.com/RustedBytes/invoke-llm/actions/workflows/audit.yaml/badge.svg)](https://github.com/RustedBytes/invoke-llm/actions/workflows/audit.yaml)
+[![badges](https://img.shields.io/badge/open-all_badges-green)](./BADGES.md)
 
 A command-line tool for querying OpenAI-compatible endpoints with a prompt and
 input file, and writing the response to an output file.
