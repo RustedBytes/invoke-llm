@@ -99,11 +99,11 @@ To contribute to this project, you'll need:
 To test `invoke-llm` with different endpoints, use the following commands:
 
 ```bash
-just -f llmfile.test llm_call_gemini
-just -f llmfile.test llm_call_gemma
-just -f llmfile.test llm_call_hf
-just -f llmfile.test llm_call_oai
-just -f llmfile.test llm_call_oai_reasoning
+just -f llmfile.test gemini
+just -f llmfile.test gemma
+just -f llmfile.test hf
+just -f llmfile.test oai
+just -f llmfile.test oai_reasoning
 ```
 
 ## Contributing
