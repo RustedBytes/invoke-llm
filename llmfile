@@ -3,6 +3,13 @@ set dotenv-load := true
 gen_ctx:
     dircat -b -e rs -o ctx.md .
 
+gen_readme_ctx:
+    echo "" >> ctx.md
+    echo "Source of of README file:" >> ctx.md
+    echo  "\`\`\`markdown" >> ctx.md
+    cat README.md >> ctx.md
+    echo "\`\`\`" >> ctx.md
+
 code_review: gen_ctx
     invoke-llm -e hf -m "Qwen/Qwen3-Coder-480B-A35B-Instruct:novita" -t 20000 -p .llms/prompts/code_review.md -i ctx.md -o .llms/qwen3_code_review.md
 
@@ -18,13 +25,7 @@ qwen3_coder_improve_comments: gen_ctx
 glm_air_code_review: gen_ctx
     invoke-llm -e hf -m "zai-org/GLM-4.5-Air-FP8:together" -t 96000 -p .llms/prompts/code_review.md -i ctx.md -o .llms/glm_air_code_review.md
 
-maverick_enhance_readme: gen_ctx
-    echo "" >> ctx.md
-    echo "Source of of README file:" >> ctx.md
-    echo  "\`\`\`markdown" >> ctx.md
-    cat README.md >> ctx.md
-    echo "\`\`\`" >> ctx.md
-
+maverick_enhance_readme: gen_ctx gen_readme_ctx
     invoke-llm -e hf -m "meta-llama/Llama-4-Maverick-17B-128E-Instruct:cerebras" -t 8000 -p .llms/prompts/enhance_readme.md -i ctx.md -o .llms/maverick_readme.md
 
 maverick_tests_enhancement: gen_ctx
@@ -33,6 +34,8 @@ maverick_tests_enhancement: gen_ctx
 qwen3_coder_non_idiomatic: gen_ctx
     invoke-llm -e hf -m "Qwen/Qwen3-Coder-480B-A35B-Instruct:novita" -t 20000 -p .llms/prompts/non_idiomatic.md -i ctx.md -o .llms/qwen3_non_idiomatic.md
 
-maverick_create_topics:
-    dircat -b -e rs -e MD -o ctx.md .
-    invoke-llm -e hf -m "meta-llama/Llama-4-Maverick-17B-128E-Instruct:cerebras" -t 2000 -p .llms/prompts/create_topics.md -i ctx.md -o .llms/maverick_create_topics.md
+gpt_create_topics: gen_ctx gen_readme_ctx
+    invoke-llm -e "https://api.groq.com/openai/v1/chat/completions" -m "openai/gpt-oss-20b" -t 32768 -p .llms/prompts/create_topics.md -i ctx.md -o .llms/gpt_create_topics.md
+
+gpt_enhance_readme: gen_ctx gen_readme_ctx
+    invoke-llm -e "https://api.groq.com/openai/v1/chat/completions" -m "openai/gpt-oss-120b" -t 32766 -p .llms/prompts/enhance_readme.md -i ctx.md -o .llms/gpt_readme.md
