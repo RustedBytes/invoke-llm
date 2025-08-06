@@ -1,5 +1,7 @@
 name: security audit
 on:
+  schedule:
+    - cron: "0 0 * * 0" # Run weekly on Sunday
   workflow_dispatch:
   push:
     paths:
