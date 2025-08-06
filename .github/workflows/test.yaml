@@ -11,8 +11,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Install libav/libsw
-        run: sudo apt install -y libavcodec-dev libavformat-dev libswscale-dev libavfilter-dev libavdevice-dev libavutil-dev
+      - name: Install libraries for FFmpeg
+        run: sudo apt update && sudo apt install -y libavcodec-dev libavformat-dev libswscale-dev libavfilter-dev libavdevice-dev libavutil-dev
       - name: Setup FFmpeg
         uses: AnimMouse/setup-ffmpeg@v1
         with:
