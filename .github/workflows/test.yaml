@@ -11,15 +11,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Install libav libraries
-        uses: tecolicom/actions-use-apt-tools@v1
-        with:
-          tools: libavcodec-dev libavformat-dev libswscale-dev libavfilter-dev libavdevice-dev libavutil-dev
-          method: timestamp
-      - name: Setup FFmpeg
-        uses: AnimMouse/setup-ffmpeg@v1
-        with:
-          version: master
       - name: Checkout code
         uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
