@@ -11,23 +11,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up cache
-        uses: actions/cache@v4
+      - name: Install libav libraries
+        uses: tecolicom/actions-use-apt-tools@v1
         with:
-          path: /var/cache/apt/archives
-          key: ${{ runner.os }}-apt-${{ hashFiles('**/lockfiles') }}-${{ secrets.CACHE_VERSION || 'v1' }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-apt-${{ hashFiles('**/lockfiles') }}-${{ secrets.CACHE_VERSION || 'v1' }}-
-      - name: Update and Install packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            libavcodec-dev \
-            libavformat-dev \
-            libswscale-dev \
-            libavfilter-dev \
-            libavdevice-dev \
-            libavutil-dev
+          tools: libavcodec-dev libavformat-dev libswscale-dev libavfilter-dev libavdevice-dev libavutil-dev
+          method: timestamp
       - name: Setup FFmpeg
         uses: AnimMouse/setup-ffmpeg@v1
         with:
