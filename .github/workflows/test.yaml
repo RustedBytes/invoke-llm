@@ -27,7 +27,7 @@ jobs:
           key: stable
       - uses: taiki-e/install-action@nextest
       - name: Test
-        run: cargo nextest run --profile ci
+        run: cargo nextest run --config-file .cargo/nextest.toml --profile ci
       # - name: Install cargo-careful
       #   run: cargo install cargo-careful
       # - name: Run cargo-careful
