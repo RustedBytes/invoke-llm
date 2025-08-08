@@ -1,5 +1,6 @@
-# [build]
+[build]
 # rustflags = ["-C", "target-feature=+crt-static"]
+rustflags = ["-Ctarget-cpu=native"]
 
 [registries.crates-io]
 protocol = "sparse"
