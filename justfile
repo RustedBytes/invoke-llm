@@ -31,4 +31,4 @@ doc:
     cargo doc --open
 
 release: check
-    cargo build --release
+    cargo +stable build --release

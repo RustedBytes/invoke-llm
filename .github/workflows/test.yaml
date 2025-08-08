@@ -22,7 +22,7 @@ jobs:
       - uses: taiki-e/install-action@nextest
       - name: Test
         run: cargo nextest run --config-file .cargo/nextest.toml --profile ci
-      # - name: Install cargo-careful
-      #   run: cargo install cargo-careful
-      # - name: Run cargo-careful
-      #   run: cargo +nightly careful test --target x86_64-unknown-linux-gnu
+    # - name: Install cargo-careful
+    #   run: cargo install cargo-careful
+    # - name: Run cargo-careful
+    #   run: cargo +nightly careful test --target x86_64-unknown-linux-gnu
