@@ -39,3 +39,7 @@ gpt_create_topics: gen_ctx gen_readme_ctx
 
 gpt_enhance_readme: gen_ctx gen_readme_ctx
     invoke-llm -e "https://api.groq.com/openai/v1/chat/completions" -m "openai/gpt-oss-120b" -t 32766 -p .llms/prompts/enhance_readme.md -i ctx.md -o .llms/gpt_readme.md
+
+maverick_license_analysis:
+    cargo license > ctx.md
+    invoke-llm -e hf -m "meta-llama/Llama-4-Maverick-17B-128E-Instruct:cerebras" -t 2000 -p .llms/prompts/license_analysis.md -i ctx.md -o .llms/maverick_license_analysis.md
