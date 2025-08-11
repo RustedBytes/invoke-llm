@@ -72,6 +72,10 @@ struct Args {
     /// Optional path to save the response (prints to stdout if not provided).
     #[arg(short, value_parser, required = false)]
     output: Option<PathBuf>,
+
+    /// Optional `API_TOKEN` to use to access the API endpoint
+    #[arg(short, long, required = false)]
+    api_token: Option<String>,
 }
 
 /// Represents a single message in the chat completion request.
@@ -222,9 +226,14 @@ async fn main() -> Result<()> {
         bail!("Token count must be greater than 0");
     }
 
-    let api_key_name = env_api_key(&args.endpoint);
-    let api_token = env::var(api_key_name)
-        .with_context(|| format!("{api_key_name} variable not set. Please provide your API token."))?;
+    let api_token = if let Some(value) = args.api_token {
+        value
+    } else {
+        let api_key_name = env_api_key(&args.endpoint);
+
+        env::var(api_key_name)
+            .with_context(|| format!("{api_key_name} variable not set. Please provide your API token."))?
+    };
 
     let prompt_content = read_file_content(args.prompt)?;
     if prompt_content.is_empty() {
