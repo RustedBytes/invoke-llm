@@ -109,7 +109,7 @@ just -f llmfile.test oai_reasoning
 Required packages on Unutun:
 
 ```bash
-sudo apt install pkgconf
+sudo apt install pkgconf clang
 ```
 
 ## Contributing
