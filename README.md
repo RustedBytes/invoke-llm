@@ -106,6 +106,12 @@ just -f llmfile.test oai
 just -f llmfile.test oai_reasoning
 ```
 
+Required packages on Unutun:
+
+```bash
+sudo apt install pkgconf
+```
+
 ## Contributing
 
 Contributions are welcome! Please submit pull requests with clear descriptions
