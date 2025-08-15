@@ -1,6 +1,6 @@
 [package]
 name = "invoke-llm"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2024"
 description = "A command-line tool for querying OpenAI-compatible endpoints"
 authors = [

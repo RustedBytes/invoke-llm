@@ -25,6 +25,9 @@ const DEFAULT_ENDPOINT: &str = "none";
 /// history.
 const ASSISTANT_ROLE: &str = "assistant";
 
+/// Role identifier for system messages in the chat completion API.
+const SYSTEM_ROLE: &str = "system";
+
 /// Role identifier for user messages in the chat completion API.
 /// Used to distinguish user inputs from AI-generated responses in the message
 /// history.
@@ -56,6 +59,10 @@ struct Args {
     /// Whether to use reasoning tokens instead of regular max tokens.
     #[arg(short, long, required = false)]
     reasoning: bool,
+
+    /// Whether to use "system" role instead of "assistant" role
+    #[arg(short, long, required = false)]
+    system_role: bool,
 
     /// Maximum number of tokens to generate.
     #[arg(short, long, required = true)]
@@ -246,7 +253,11 @@ async fn main() -> Result<()> {
     }
 
     let mut messages = vec![RequestMessage {
-        role: ASSISTANT_ROLE.to_owned(),
+        role: if args.system_role {
+            SYSTEM_ROLE.to_owned()
+        } else {
+            ASSISTANT_ROLE.to_owned()
+        },
         content: prompt_content,
     }];
 
