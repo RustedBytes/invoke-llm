@@ -9,10 +9,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
-      - name: Set up Rust
-        uses: actions/setup-rust@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
-          rust-version: stable
+          toolchain: stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: stable
       - name: Build release
         run: cargo build --release
       - name: Upload release binary as artifact
