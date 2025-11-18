@@ -59,6 +59,7 @@ The following environment variables are used to store API keys:
 * `API_TOKEN_GOOGLE`: Google API key
 * `API_TOKEN_HF`: Hugging Face API key
 * `API_TOKEN`: Default API key for custom endpoints
+* `SENTRY_DSN`: Optional Sentry DSN for capturing runtime errors and panics
 
 ### Supported Endpoints
 

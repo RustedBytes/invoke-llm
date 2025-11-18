@@ -4,7 +4,6 @@ mod tests;
 
 use anyhow::{Context, Result, bail};
 use clap::Parser;
-use log::{info, warn};
 use reqwest::Client;
 use serde::Serialize;
 use std::env;
@@ -12,6 +11,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 use std::time::Instant;
+use tracing::{info, warn};
 
 use crate::schema::ApiResponse;
 
@@ -32,6 +32,9 @@ const SYSTEM_ROLE: &str = "system";
 /// Used to distinguish user inputs from AI-generated responses in the message
 /// history.
 const USER_ROLE: &str = "user";
+
+/// Environment variable that holds the Sentry DSN.
+const SENTRY_DSN_ENV: &str = "SENTRY_DSN";
 
 /// Command-line argument parser for the application.
 ///
@@ -191,7 +194,46 @@ fn env_api_key(name: &str) -> &str {
     }
 }
 
+/// Initialize Sentry reporting when the corresponding DSN is provided.
+fn init_sentry() -> Option<sentry::ClientInitGuard> {
+    let dsn = match env::var(SENTRY_DSN_ENV) {
+        Ok(value) if !value.trim().is_empty() => value,
+        _ => return None,
+    };
+
+    info!("Sentry DSN detected. Enabling error monitoring.");
+    let guard = sentry::init((dsn, sentry::ClientOptions {
+        release: sentry::release_name!(),
+        attach_stacktrace: true,
+        ..Default::default()
+    }));
+
+    Some(guard)
+}
+
 /// Main application entry point.
+///
+/// Initializes logging, optional Sentry monitoring, and delegates the core
+/// business logic to [`run`].
+#[tokio::main]
+async fn main() -> Result<()> {
+    tracing_subscriber::fmt::init();
+
+    let sentry_guard = init_sentry();
+    let sentry_enabled = sentry_guard.is_some();
+
+    let result = run().await;
+
+    if let Err(ref error) = result {
+        if sentry_enabled {
+            sentry_anyhow::capture_anyhow(error);
+        }
+    }
+
+    result
+}
+
+/// Execute the application's core workflow.
 ///
 /// This function orchestrates the entire application workflow:
 /// 1. Parses command-line arguments
@@ -202,7 +244,7 @@ fn env_api_key(name: &str) -> &str {
 /// 6. Processes and outputs the response
 ///
 /// # Workflow
-/// 1. Initialize logging and timing
+/// 1. Initialize timing
 /// 2. Parse command-line arguments using Args struct
 /// 3. Validate token count is greater than 0
 /// 4. Retrieve API key from environment variables
@@ -222,10 +264,7 @@ fn env_api_key(name: &str) -> &str {
 /// # Returns
 /// * `Ok(())` on successful completion
 /// * `Err` on any failure during execution
-#[tokio::main]
-async fn main() -> Result<()> {
-    tracing_subscriber::fmt::init();
-
+async fn run() -> Result<()> {
     let start_time = Instant::now();
     let args = Args::parse();
 
