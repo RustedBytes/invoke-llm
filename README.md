@@ -107,7 +107,7 @@ just -f llmfile.test oai
 just -f llmfile.test oai_reasoning
 ```
 
-Required packages on Unutun:
+Required packages on Ubuntu:
 
 ```bash
 sudo apt install libssl-dev pkgconf clang
