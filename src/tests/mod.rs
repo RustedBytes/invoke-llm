@@ -3,7 +3,10 @@ use serde_json;
 use std::{io::Write, path::Path};
 use tempfile::NamedTempFile;
 
-use crate::{RequestMessage, RequestPayload, env_api_key, known_endpoints, read_file_content, schema::ApiResponse};
+use crate::{
+    RequestMessage, RequestPayload, ResponseFormat, env_api_key, known_endpoints, read_file_content, read_schema_file,
+    schema::ApiResponse,
+};
 
 #[test]
 fn test_read_file_content() -> Result<()> {
@@ -159,6 +162,7 @@ fn test_request_payload_serialization() -> Result<()> {
         model: "test_model",
         max_tokens: Some(100),
         max_completion_tokens: None,
+        response_format: None,
     };
 
     let json = serde_json::to_string(&payload)?;
@@ -209,6 +213,7 @@ fn test_request_payload_serialization_with_different_token_settings() -> Result<
         model: "test_model",
         max_tokens: Some(100),
         max_completion_tokens: None,
+        response_format: None,
     };
 
     let json = serde_json::to_string(&payload)?;
@@ -224,6 +229,7 @@ fn test_request_payload_serialization_with_different_token_settings() -> Result<
         model: "test_model",
         max_tokens: None,
         max_completion_tokens: Some(100),
+        response_format: None,
     };
 
     let json = serde_json::to_string(&payload)?;
@@ -239,6 +245,7 @@ fn test_request_payload_serialization_with_different_token_settings() -> Result<
         model: "test_model",
         max_tokens: Some(100),
         max_completion_tokens: Some(100),
+        response_format: None,
     };
 
     let json = serde_json::to_string(&payload)?;
@@ -259,6 +266,7 @@ fn test_request_payload_serialization_with_empty_messages() -> Result<()> {
         model: "test_model",
         max_tokens: Some(100),
         max_completion_tokens: None,
+        response_format: None,
     };
 
     let json = serde_json::to_string(&payload)?;
@@ -282,12 +290,174 @@ fn test_request_payload_serialization_with_multiple_messages() -> Result<()> {
         model: "test_model",
         max_tokens: Some(100),
         max_completion_tokens: None,
+        response_format: None,
     };
 
     let json = serde_json::to_string(&payload)?;
     assert!(json.contains("\"messages\":["));
     assert!(json.contains("\"model\":\"test_model\""));
     assert!(json.contains("\"max_tokens\":100"));
+
+    Ok(())
+}
+
+#[test]
+fn test_read_schema_file() -> Result<()> {
+    // Create a temporary schema file
+    let mut temp_file = NamedTempFile::new()?;
+    let schema = r#"{
+        "name": "get_weather",
+        "description": "Get the current weather",
+        "strict": true,
+        "schema": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "description": "The city and state"
+                },
+                "unit": {
+                    "type": "string",
+                    "enum": ["celsius", "fahrenheit"]
+                }
+            },
+            "required": ["location", "unit"],
+            "additionalProperties": false
+        }
+    }"#;
+    writeln!(temp_file, "{}", schema)?;
+
+    // Read the schema file
+    let schema_value = read_schema_file(temp_file.path())?;
+    assert!(schema_value.is_object());
+    assert_eq!(schema_value["name"], "get_weather");
+    assert_eq!(schema_value["strict"], true);
+
+    Ok(())
+}
+
+#[test]
+fn test_read_schema_file_invalid_json() -> Result<()> {
+    // Create a temporary file with invalid JSON
+    let mut temp_file = NamedTempFile::new()?;
+    writeln!(temp_file, "{{ invalid json")?;
+
+    // Attempt to read the schema file should fail
+    let result = read_schema_file(temp_file.path());
+    assert!(result.is_err());
+
+    Ok(())
+}
+
+#[test]
+fn test_read_schema_file_not_found() {
+    // Test reading a non-existent file
+    let result = read_schema_file(Path::new("non_existent_schema.json"));
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_response_format_serialization() -> Result<()> {
+    let schema = serde_json::json!({
+        "name": "test_schema",
+        "strict": true,
+        "schema": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "type": "string"
+                }
+            }
+        }
+    });
+
+    let response_format = ResponseFormat {
+        r#type: "json_schema".to_owned(),
+        json_schema: schema,
+    };
+
+    let json = serde_json::to_string(&response_format)?;
+    assert!(json.contains("\"type\":\"json_schema\""));
+    assert!(json.contains("\"json_schema\":{"));
+    assert!(json.contains("\"name\":\"test_schema\""));
+
+    Ok(())
+}
+
+#[test]
+fn test_request_payload_with_response_format() -> Result<()> {
+    let mut messages = vec![RequestMessage {
+        role: "assistant".to_owned(),
+        content: "Hello, world!".to_owned(),
+    }];
+
+    messages.push(RequestMessage {
+        role: "user".to_owned(),
+        content: "Hi!".to_owned(),
+    });
+
+    let schema = serde_json::json!({
+        "name": "test_schema",
+        "strict": true,
+        "schema": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "type": "string"
+                }
+            }
+        }
+    });
+
+    let response_format = Some(ResponseFormat {
+        r#type: "json_schema".to_owned(),
+        json_schema: schema,
+    });
+
+    let payload = RequestPayload {
+        messages,
+        model: "test_model",
+        max_tokens: Some(100),
+        max_completion_tokens: None,
+        response_format,
+    };
+
+    let json = serde_json::to_string(&payload)?;
+    assert!(json.contains("\"messages\":["));
+    assert!(json.contains("\"model\":\"test_model\""));
+    assert!(json.contains("\"max_tokens\":100"));
+    assert!(json.contains("\"response_format\":{"));
+    assert!(json.contains("\"type\":\"json_schema\""));
+
+    Ok(())
+}
+
+#[test]
+fn test_request_payload_without_response_format() -> Result<()> {
+    let mut messages = vec![RequestMessage {
+        role: "assistant".to_owned(),
+        content: "Hello, world!".to_owned(),
+    }];
+
+    messages.push(RequestMessage {
+        role: "user".to_owned(),
+        content: "Hi!".to_owned(),
+    });
+
+    let payload = RequestPayload {
+        messages,
+        model: "test_model",
+        max_tokens: Some(100),
+        max_completion_tokens: None,
+        response_format: None,
+    };
+
+    let json = serde_json::to_string(&payload)?;
+    assert!(json.contains("\"messages\":["));
+    assert!(json.contains("\"model\":\"test_model\""));
+    assert!(json.contains("\"max_tokens\":100"));
+    // response_format should not be present when None
+    assert!(!json.contains("\"response_format\""));
 
     Ok(())
 }

@@ -33,7 +33,7 @@ with a prompt and input file, and writes the response to an output file. The
 basic usage is as follows:
 
 ```bash
-invoke-llm --endpoint <endpoint> --model <model> --tokens <tokens> --prompt <prompt_file> --input <input_file> [--output <output_file>]
+invoke-llm --endpoint <endpoint> --model <model> --tokens <tokens> --prompt <prompt_file> --input <input_file> [--output <output_file>] [--schema <schema_file>]
 ```
 
 ### Command-Line Arguments
@@ -50,6 +50,8 @@ The following command-line arguments are supported:
   provided).
 * `--reasoning` (optional): Whether to use reasoning models instead of regular
   ones.
+* `--schema` (optional): Path to a JSON schema file for structured output (using
+  OpenAI's structured output format).
 
 ### Environment Variables
 
@@ -69,6 +71,47 @@ The following endpoints are currently supported:
 * "google": Google Generative Language API endpoint
 * "hf": Hugging Face API endpoint
 * Custom endpoints: Any custom URL can be used as an endpoint
+
+### Structured Output with JSON Schema
+
+The `--schema` option enables you to specify a JSON schema file that defines the
+expected structure of the response. This is useful when you need the model to
+return data in a specific format.
+
+Example schema file (`schema.json`):
+
+```json
+{
+  "name": "translation_response",
+  "description": "Response format for translation",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translated_text": {
+        "type": "string",
+        "description": "The translated text"
+      },
+      "source_language": {
+        "type": "string",
+        "description": "The detected source language"
+      },
+      "target_language": {
+        "type": "string",
+        "description": "The target language"
+      }
+    },
+    "required": ["translated_text", "source_language", "target_language"],
+    "additionalProperties": false
+  }
+}
+```
+
+Usage with schema:
+
+```bash
+invoke-llm --endpoint openai --model gpt-4o --tokens 500 --prompt prompt.txt --input input.txt --schema schema.json --output response.json
+```
 
 ### Examples
 
