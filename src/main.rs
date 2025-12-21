@@ -86,6 +86,10 @@ struct Args {
     /// Optional `API_TOKEN` to use to access the API endpoint
     #[arg(short, long, required = false)]
     api_token: Option<String>,
+
+    /// Optional path to a JSON schema file for structured output
+    #[arg(long, value_parser, required = false)]
+    schema: Option<PathBuf>,
 }
 
 /// Represents a single message in the chat completion request.
@@ -96,6 +100,15 @@ struct Args {
 struct RequestMessage {
     role: String,
     content: String,
+}
+
+/// Represents the response format configuration for structured output.
+///
+/// This structure is used to specify the JSON schema for the expected response format.
+#[derive(Serialize, Debug, Clone)]
+struct ResponseFormat {
+    r#type: String,
+    json_schema: serde_json::Value,
 }
 
 /// The complete request payload sent to the chat completion API.
@@ -111,6 +124,7 @@ struct RequestMessage {
 ///   models)
 /// * `max_completion_tokens` - Maximum number of completion tokens (used for
 ///   reasoning models)
+/// * `response_format` - Optional structured output schema
 #[derive(Serialize, Debug)]
 struct RequestPayload<'a> {
     messages: Vec<RequestMessage>,
@@ -119,6 +133,8 @@ struct RequestPayload<'a> {
     max_tokens: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     max_completion_tokens: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    response_format: Option<ResponseFormat>,
 }
 
 /// Reads the entire contents of a file into a string.
@@ -140,6 +156,26 @@ struct RequestPayload<'a> {
 /// let content = read_file_content("example.txt")?;
 fn read_file_content(file_path: impl AsRef<Path>) -> Result<String> {
     fs::read_to_string(file_path).context("Failed to read file content")
+}
+
+/// Reads and parses a JSON schema file.
+///
+/// This function reads a JSON file containing a schema definition and parses it
+/// into a serde_json::Value. The schema is validated to ensure it's valid JSON.
+///
+/// # Arguments
+/// * `schema_path` - Path to the JSON schema file
+///
+/// # Returns
+/// * `Ok(serde_json::Value)` - The parsed JSON schema
+/// * `Err` - An error if the file could not be read or parsed as JSON
+fn read_schema_file(schema_path: impl AsRef<Path>) -> Result<serde_json::Value> {
+    let schema_content = fs::read_to_string(schema_path).context("Failed to read schema file")?;
+
+    let schema: serde_json::Value =
+        serde_json::from_str(&schema_content).context("Failed to parse JSON schema file")?;
+
+    Ok(schema)
 }
 
 /// Maps known endpoint names to their corresponding API URLs.
@@ -202,11 +238,14 @@ fn init_sentry() -> Option<sentry::ClientInitGuard> {
     };
 
     info!("Sentry DSN detected. Enabling error monitoring.");
-    let guard = sentry::init((dsn, sentry::ClientOptions {
-        release: sentry::release_name!(),
-        attach_stacktrace: true,
-        ..Default::default()
-    }));
+    let guard = sentry::init((
+        dsn,
+        sentry::ClientOptions {
+            release: sentry::release_name!(),
+            attach_stacktrace: true,
+            ..Default::default()
+        },
+    ));
 
     Some(guard)
 }
@@ -305,11 +344,23 @@ async fn run() -> Result<()> {
         content: input_content,
     });
 
+    // Read and parse the schema file if provided
+    let response_format = if let Some(schema_path) = args.schema {
+        let schema_json = read_schema_file(&schema_path)?;
+        Some(ResponseFormat {
+            r#type: "json_schema".to_owned(),
+            json_schema: schema_json,
+        })
+    } else {
+        None
+    };
+
     let payload = RequestPayload {
         messages,
         model: &args.model,
         max_tokens: if args.reasoning { None } else { Some(args.tokens) },
         max_completion_tokens: if args.reasoning { Some(args.tokens) } else { None },
+        response_format,
     };
 
     let client = Client::builder()
