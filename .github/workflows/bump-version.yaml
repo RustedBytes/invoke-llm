@@ -16,9 +16,10 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
-      - name: Install cargo-edit
-        run: cargo install cargo-edit
-        shell: bash
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: stable
+      - uses: taiki-e/install-action@cargo-edit
       - name: Bump version in Cargo.toml
         run: |
           cargo set-version ${{ github.event.inputs.version }}
