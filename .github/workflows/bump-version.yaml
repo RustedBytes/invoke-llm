@@ -19,10 +19,14 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           key: stable
-      - uses: taiki-e/install-action@cargo-edit
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-edit
       - name: Bump version in Cargo.toml
+        env:
+          VERSION: ${{ github.event.inputs.version }}
         run: |
-          cargo set-version ${{ github.event.inputs.version }}
+          cargo set-version "$VERSION"
         shell: bash
       - name: Update Cargo.lock
         run: cargo update
