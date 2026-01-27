@@ -2029,9 +2029,9 @@ dependencies = [
 
 [[package]]
 name = "sentry-anyhow"
-version = "0.46.0"
+version = "0.46.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d1832cd051f3198af8ebc5222da5fd213e49976d758b7defa7accbff3aed1909"
+checksum = "c8e45993dc8981e7fb5d9b7f701f65ca5c9fb0390263e47f612f30bea3d35fac"
 dependencies = [
  "anyhow",
  "sentry-backtrace",
