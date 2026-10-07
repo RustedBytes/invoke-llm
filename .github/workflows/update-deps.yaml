@@ -3,23 +3,35 @@ on:
   schedule:
     - cron: "0 0 * * 0" # Run weekly on Sunday
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Setup cargo and update dependencies
         run: |
           cargo install cargo-edit
           cargo update
           cargo upgrade --incompatible
         shell: bash
+      - name: Generate dependency PR token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.DEPENDENCY_APP_CLIENT_ID }}
+          private-key: ${{ secrets.DEPENDENCY_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
       - name: Create PR
         id: create-pr
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
           commit-message: 'chore: update dependencies'
           title: 'chore: update dependencies'
           body: |
